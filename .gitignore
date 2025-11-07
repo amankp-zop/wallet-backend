@@ -1,0 +1,7 @@
+# Local development config (contains localhost settings)
+configs/config.local.yaml
+
+# Keep the main config in git for Docker
+# configs/config.yaml is tracked
+.idea
+.run 
