@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/amankp-zop/wallet/internal/api/middleware"
 	"github.com/amankp-zop/wallet/internal/domain"
 	"github.com/amankp-zop/wallet/internal/service"
 	"github.com/go-playground/validator/v10"
@@ -101,4 +102,26 @@ func (h *UserHandler)Login(w http.ResponseWriter, r *http.Request){
 	json.NewEncoder(w).Encode(map[string]string{
 		"token": token,
 	})
+}
+
+func (h *UserHandler)GetProfile(w http.ResponseWriter, r *http.Request){
+	userID, ok := r.Context().Value(middleware.UserIDContextKey).(int64)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusInternalServerError)
+		return
+	}
+
+	user, err := h.userService.GetProfile(r.Context(),userID)
+	if err!=nil{
+		if errors.Is(err, service.ErrUserNotFound){
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type","application/json")
+	json.NewEncoder(w).Encode(user)
 }

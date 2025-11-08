@@ -87,3 +87,16 @@ func (s *userService) Login(ctx context.Context, email, password string) (string
 
 	return signedToken, nil
 }
+
+func (s *userService) GetProfile(ctx context.Context, userID int64) (*domain.User, error){
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err!=nil{
+		return nil, err
+	}
+
+	if user == nil{
+		return nil, ErrUserNotFound
+	}
+
+	return user, nil
+}

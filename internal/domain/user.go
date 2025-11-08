@@ -17,9 +17,11 @@ type User struct {
 type UserService interface {
 	Signup(ctx context.Context, name, email, password string) (*User, error)
 	Login(ctx context.Context, email, password string) (string, error)
+	GetProfile(ctx context.Context, userID int64) (*User, error)
 }
 
 type UserRepository interface {
 	Create(ctx context.Context, user *User) error
 	GetByEmail(ctx context.Context, email string) (*User, error)
+	GetByID(ctx context.Context, id int64) (*User, error)
 }

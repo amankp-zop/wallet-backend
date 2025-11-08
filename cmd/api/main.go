@@ -11,6 +11,7 @@ import (
 	"github.com/amankp-zop/wallet/internal/database"
 	"github.com/amankp-zop/wallet/internal/repository"
 	"github.com/amankp-zop/wallet/internal/service"
+	authenticationMiddleware "github.com/amankp-zop/wallet/internal/api/middleware"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -56,6 +57,13 @@ func main() {
 	router.Route("/users", func(r chi.Router) {
 		r.Post("/signup", userHandler.Signup)
 		r.Post("/login", userHandler.Login)
+
+		router.Group(func(r chi.Router) {
+			r.Use(authenticationMiddleware.AuthMiddleware(cfg.Auth.JWTSecret))
+
+			// Protected routes
+			r.Get("/users/profile", userHandler.GetProfile)
+		})
 	})
 
 	log.Printf("Starting server on port %s", cfg.Server.Port)

@@ -49,3 +49,19 @@ func (r *mysqlUserRepository) GetByEmail(ctx context.Context, email string) (*do
 
 	return &user, nil
 }
+
+func (r *mysqlUserRepository) GetByID(ctx context.Context, id int64) (*domain.User, error) {
+	query := "SELECT id, name, email, created_at, updated_at FROM users WHERE id = ?"
+	row := r.db.QueryRowContext(ctx, query, id)
+
+	var user domain.User
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
