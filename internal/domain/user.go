@@ -16,6 +16,7 @@ type User struct {
 
 type UserService interface {
 	Signup(ctx context.Context, name, email, password string) (*User, error)
+	Login(ctx context.Context, email, password string) (string, error)
 }
 
 type UserRepository interface {

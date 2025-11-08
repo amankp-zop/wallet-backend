@@ -30,13 +30,13 @@ func main() {
 	defer db.Close()
 
 	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo)
+	userService := service.NewUserService(userRepo, cfg.Auth.JWTSecret)
 	userHandler := handler.NewUserHandler(userService)
 
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
-	//router.Use(middleware.Recoverer)
+	router.Use(middleware.Recoverer)
 
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		response := struct {
@@ -54,8 +54,8 @@ func main() {
 	})
 
 	router.Route("/users", func(r chi.Router) {
-		fmt.Printf("Calling users route\n")
 		r.Post("/signup", userHandler.Signup)
+		r.Post("/login", userHandler.Login)
 	})
 
 	log.Printf("Starting server on port %s", cfg.Server.Port)

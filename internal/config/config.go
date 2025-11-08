@@ -11,6 +11,7 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	Redis    RedisConfig
+	Auth     AuthConfig
 }
 
 type ServerConfig struct {
@@ -23,6 +24,10 @@ type DatabaseConfig struct {
 
 type RedisConfig struct {
 	Addr string
+}
+
+type AuthConfig struct {
+	JWTSecret string `mapstructure:"jwt_secret"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

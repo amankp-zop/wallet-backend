@@ -4,3 +4,5 @@ database:
   dsn: 'user:password@tcp(db:3306)/wallet?parseTime=true'
 redis:
   addr: 'redis:6379'
+auth_config:
+  jwt_secret: 'bitchesgetstuffdone'
