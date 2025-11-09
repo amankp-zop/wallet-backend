@@ -17,7 +17,7 @@ type Wallet struct {
 }
 
 type WalletRepository interface {
-	Create(ctx context.Context, wallet *Wallet) error
+	CreateWallet(ctx context.Context, wallet *Wallet) error
 	GetByUserID(ctx context.Context, userID int64) (*Wallet, error)
 }
 

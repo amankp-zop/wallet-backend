@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/amankp-zop/wallet/internal/domain"
+	"github.com/amankp-zop/wallet/internal/repository"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/shopspring/decimal"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,50 +18,70 @@ var ErrInvalidCredentials = errors.New("invalid email or password")
 var ErrUserNotFound = errors.New("user not found")
 
 type userService struct {
-	userRepo domain.UserRepository
+	store     repository.Store
 	jwtSecret string
 	tokenTTL  time.Duration
 }
 
-func NewUserService(userRepo domain.UserRepository, jwtsecret string) domain.UserService {
+func NewUserService(store repository.Store, jwtsecret string) domain.UserService {
 	return &userService{
-		userRepo: userRepo,
+		store:     store,
 		jwtSecret: jwtsecret,
 		tokenTTL:  24 * time.Hour,
 	}
 }
 
 func (s *userService) Signup(ctx context.Context, name, email, password string) (*domain.User,error){
-	existingUser, err := s.userRepo.GetByEmail(ctx, email)
+	var user *domain.User
+
+	err := s.store.ExecTx(ctx, func(q *repository.Queries)error{
+		exisingUser,err := s.store.GetByEmail(ctx, email)
+		if err!=nil{
+			return err
+		}
+
+		if exisingUser != nil{
+			return ErrUserAlreadyExists
+		}
+
+		hashedPassword,err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err!=nil{
+			return err
+		}
+
+		user = &domain.User{
+			Name: name,
+			Email: email,
+			Password: string(hashedPassword),
+		}
+
+		err = s.store.CreateUser(ctx, user)
+		if err!=nil{
+			return err
+		}
+
+		walletToCreate := &domain.Wallet{
+			UserID: user.ID,
+			Balance: decimal.NewFromInt(0),
+			Currency: "USD",
+		}
+		err = s.store.CreateWallet(ctx, walletToCreate)
+		if err!=nil{
+			return err
+		}
+
+		return nil
+	})
+
 	if err!=nil{
-		return nil,err
-	}
-
-	if existingUser != nil{
-		return nil, ErrUserAlreadyExists
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil{
 		return nil, err
 	}
 
-	newUser := &domain.User{
-		Name: name,
-		Email: email,
-		Password: string(hashedPassword),
-	}
-
-	err = s.userRepo.Create(ctx, newUser)
-	if err != nil{
-		return nil, err
-	}
-
-	return newUser, nil
+	return user, nil
 }
 
 func (s *userService) Login(ctx context.Context, email, password string) (string, error){
-	user, err := s.userRepo.GetByEmail(ctx, email)
+	user, err := s.store.GetByEmail(ctx, email)
 	if err!=nil{
 		return "", err
 	}
@@ -89,7 +111,7 @@ func (s *userService) Login(ctx context.Context, email, password string) (string
 }
 
 func (s *userService) GetProfile(ctx context.Context, userID int64) (*domain.User, error){
-	user, err := s.userRepo.GetByID(ctx, userID)
+	user, err := s.store.GetByID(ctx, userID)
 	if err!=nil{
 		return nil, err
 	}

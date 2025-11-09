@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/amankp-zop/wallet/internal/domain"
+	"github.com/amankp-zop/wallet/internal/repository"
 )
 
 var (
@@ -12,17 +13,17 @@ var (
 )
 
 type walletService struct {
-	walletRepo domain.WalletRepository
+	store   repository.Store
 }
 
-func NewWalletService(repo domain.WalletRepository) domain.WalletService {
+func NewWalletService(store repository.Store) domain.WalletService {
 	return &walletService{
-		walletRepo: repo,
+		store: store,
 	}
 }
 
 func (s *walletService) GetWalletByUserID(ctx context.Context, userID int64) (*domain.Wallet, error) {
-	wallet, err := s.walletRepo.GetByUserID(ctx, userID)
+	wallet, err := s.store.GetByUserID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}

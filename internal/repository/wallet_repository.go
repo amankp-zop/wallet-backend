@@ -8,16 +8,16 @@ import (
 )
 
 type walletRepository struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewWalletRepository(db *sql.DB) domain.WalletRepository {
+func NewWalletRepository(db DBTX) domain.WalletRepository {
 	return &walletRepository{
 		db: db,
 	}
 }
 
-func (r *walletRepository) Create(ctx context.Context, wallet *domain.Wallet) error {
+func (r *walletRepository) CreateWallet(ctx context.Context, wallet *domain.Wallet) error {
 	query := `INSERT INTO wallets (user_id, balance, currency) VALUES (?, ?, ?)`
 	result, err := r.db.ExecContext(ctx, query, wallet.UserID, wallet.Balance, wallet.Currency)
 	if err != nil {
@@ -50,7 +50,7 @@ func (r *walletRepository) GetByUserID(ctx context.Context, userID int64) (*doma
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		
+
 		return nil, err
 	}
 

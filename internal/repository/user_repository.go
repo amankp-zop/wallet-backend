@@ -8,16 +8,16 @@ import (
 )
 
 type mysqlUserRepository struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewUserRepository(db *sql.DB) domain.UserRepository {
+func NewUserRepository(db DBTX) domain.UserRepository {
 	return &mysqlUserRepository{
 		db: db,
 	}
 }
 
-func (r *mysqlUserRepository) Create(ctx context.Context, user *domain.User) error {
+func (r *mysqlUserRepository) CreateUser(ctx context.Context, user *domain.User) error {
 	query := "INSERT INTO users (name, email, password) VALUES (?, ?, ?)"
 	result, err := r.db.ExecContext(ctx, query, user.Name, user.Email, user.Password)
 	if err != nil {

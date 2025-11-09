@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	"github.com/amankp-zop/wallet/internal/api/handler"
+	authenticationMiddleware "github.com/amankp-zop/wallet/internal/api/middleware"
 	"github.com/amankp-zop/wallet/internal/config"
 	"github.com/amankp-zop/wallet/internal/database"
 	"github.com/amankp-zop/wallet/internal/repository"
 	"github.com/amankp-zop/wallet/internal/service"
-	authenticationMiddleware "github.com/amankp-zop/wallet/internal/api/middleware"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -30,9 +30,12 @@ func main() {
 	fmt.Println("Database connected Successfully.")
 	defer db.Close()
 
-	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo, cfg.Auth.JWTSecret)
+	store := repository.NewStore(db)
+	userService := service.NewUserService(store, cfg.Auth.JWTSecret)
 	userHandler := handler.NewUserHandler(userService)
+
+	walletService := service.NewWalletService(store)
+	walletHandler := handler.NewWalletHandler(walletService)
 
 	router := chi.NewRouter()
 
@@ -63,6 +66,7 @@ func main() {
 
 			// Protected routes
 			r.Get("/users/profile", userHandler.GetProfile)
+			r.Get("/users/wallets", walletHandler.GetWallet)
 		})
 	})
 
