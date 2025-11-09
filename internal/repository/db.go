@@ -16,6 +16,7 @@ type Store interface {
 	ExecTx(ctx context.Context, fn func(*Queries) error) error
 	domain.UserRepository   
 	domain.WalletRepository
+	domain.TransactionRepository
 }
 
 // SQLStore provides all functions to execute SQL queries and transactions
@@ -24,7 +25,7 @@ type SQLStore struct {
 	*Queries
 }
 
-// NewStore creates a new store - THIS FUNCTION IS NOW CORRECT.
+// NewStore creates a new store
 func NewStore(db *sql.DB) Store {
 	return &SQLStore{
 		db:      db,
