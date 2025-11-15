@@ -6,6 +6,7 @@ type Queries struct {
 	domain.WalletRepository
 	domain.UserRepository
 	domain.TransactionRepository
+	domain.OutboxRepository
 }
 
 func NewQueries(db DBTX) *Queries {

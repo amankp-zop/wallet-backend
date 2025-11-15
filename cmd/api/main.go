@@ -13,7 +13,7 @@ import (
 	"github.com/amankp-zop/wallet/internal/repository"
 	"github.com/amankp-zop/wallet/internal/service"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/middleware"	
 )
 
 func main() {
@@ -27,14 +27,22 @@ func main() {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 
+	// redisOpt, err:= asynq.ParseRedisURI(cfg.Redis.Addr)
+	// if err != nil {
+	// 	log.Fatalf("Could not parse redis url: %v", err)
+	// }
+
 	fmt.Println("Database connected Successfully.")
 	defer db.Close()
 
 	store := repository.NewStore(db)
+	// taskProducer := tasks.NewTaskProducer(redisOpt)
 	userService := service.NewUserService(store, cfg.Auth.JWTSecret)
 	userHandler := handler.NewUserHandler(userService)
 
 	walletService := service.NewWalletService(store)
+	// transactionService := service.NewTransactionService(store)
+	
 	walletHandler := handler.NewWalletHandler(walletService)
 
 	router := chi.NewRouter()

@@ -17,6 +17,7 @@ type Store interface {
 	domain.UserRepository   
 	domain.WalletRepository
 	domain.TransactionRepository
+	domain.OutboxRepository
 }
 
 // SQLStore provides all functions to execute SQL queries and transactions
