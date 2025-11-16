@@ -32,10 +32,7 @@ type AuthConfig struct {
 
 func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
-	
-	// Support environment-specific configs
-	// Priority: config.local.yaml > config.yaml
-	// Use config.local.yaml for local development/debugging
+
 	env := os.Getenv("APP_ENV")
 	if env == "" {
 		// Check if local config exists for development

@@ -11,6 +11,8 @@ type Outbox struct {
 
 type OutboxRepository interface {
 	CreateOutbox(ctx context.Context, event *Outbox) error
+	FetchAndLock(ctx context.Context, limit int64) ([]*Outbox, error)
+	UpdateStatus(ctx context.Context, ids []int64, status string) error
 }
 
 

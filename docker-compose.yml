@@ -49,6 +49,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    environment:
+      APP_ENV: docker
     ports:
       - '8080:8080'
     depends_on:
@@ -65,6 +67,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    environment:
+      APP_ENV: docker
     depends_on:
       db:
         condition: service_healthy
@@ -72,6 +76,21 @@ services:
         condition: service_healthy
 
     command: ['/worker']
+
+  relay:
+    container_name: wallet_relay
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: docker
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ['/relay']
 
 volumes:
   db_data:

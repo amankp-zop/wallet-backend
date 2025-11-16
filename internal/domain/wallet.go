@@ -19,6 +19,8 @@ type Wallet struct {
 type WalletRepository interface {
 	CreateWallet(ctx context.Context, wallet *Wallet) error
 	GetByUserID(ctx context.Context, userID int64) (*Wallet, error)
+	GetWalletForUpdate(ctx context.Context, walletID int64) (*Wallet, error)
+	UpdateWalletBalance(ctx context.Context, walletID int64, newBalance decimal.Decimal) error
 }
 
 type WalletService interface {

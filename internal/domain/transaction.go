@@ -26,6 +26,8 @@ type Transaction struct {
 
 type TransactionRepository interface {
 	CreateTransaction(ctx context.Context, tx *Transaction) error
+	GetTransactionByID(ctx context.Context, id int64) (*Transaction, error)
+	UpdateTransactionStatus(ctx context.Context, id int64 , status TransactionStatus) error
 }
 
 type TransactionService interface {

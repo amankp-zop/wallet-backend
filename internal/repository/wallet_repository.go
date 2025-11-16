@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/amankp-zop/wallet/internal/domain"
+	"github.com/shopspring/decimal"
 )
 
 type walletRepository struct {
@@ -55,4 +56,35 @@ func (r *walletRepository) GetByUserID(ctx context.Context, userID int64) (*doma
 	}
 
 	return &wallet, nil
+}
+
+func (r *walletRepository) GetWalletForUpdate(ctx context.Context, walletID int64) (*domain.Wallet, error) {
+	query := `SELECT id, user_id, balance, currency, created_at, updated_at FROM wallets WHERE id = ? FOR UPDATE`
+	row := r.db.QueryRowContext(ctx, query, walletID)
+
+	var wallet domain.Wallet
+	err := row.Scan(
+		&wallet.ID,
+		&wallet.UserID,
+		&wallet.Balance,
+		&wallet.Currency,
+		&wallet.CreatedAt,
+		&wallet.UpdatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return &wallet, nil
+}
+
+func (r *walletRepository) UpdateWalletBalance(ctx context.Context, walletID int64, newBalance decimal.Decimal) error {
+	query := `UPDATE wallets SET balance = ? WHERE id = ?`
+	_, err := r.db.ExecContext(ctx, query, newBalance, walletID)
+	return err
 }

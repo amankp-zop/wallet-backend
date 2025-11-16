@@ -13,7 +13,7 @@ import (
 	"github.com/amankp-zop/wallet/internal/repository"
 	"github.com/amankp-zop/wallet/internal/service"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"	
+	"github.com/go-chi/chi/middleware"
 )
 
 func main() {
@@ -36,13 +36,15 @@ func main() {
 	defer db.Close()
 
 	store := repository.NewStore(db)
-	// taskProducer := tasks.NewTaskProducer(redisOpt)
-	userService := service.NewUserService(store, cfg.Auth.JWTSecret)
-	userHandler := handler.NewUserHandler(userService)
-
-	walletService := service.NewWalletService(store)
-	// transactionService := service.NewTransactionService(store)
 	
+	// taskProducer := tasks.NewTaskProducer(redisOpt)
+	
+	userService := service.NewUserService(store, cfg.Auth.JWTSecret)
+	walletService := service.NewWalletService(store)
+	transactionService:= service.NewTransactionService(store)
+
+	userHandler := handler.NewUserHandler(userService)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
 	walletHandler := handler.NewWalletHandler(walletService)
 
 	router := chi.NewRouter()
@@ -65,17 +67,17 @@ func main() {
 		}
 	})
 
-	router.Route("/users", func(r chi.Router) {
-		r.Post("/signup", userHandler.Signup)
-		r.Post("/login", userHandler.Login)
 
-		router.Group(func(r chi.Router) {
-			r.Use(authenticationMiddleware.AuthMiddleware(cfg.Auth.JWTSecret))
+	router.Post("/users/signup", userHandler.Signup)
+	router.Post("/users/login", userHandler.Login)
 
-			// Protected routes
-			r.Get("/users/profile", userHandler.GetProfile)
-			r.Get("/users/wallets", walletHandler.GetWallet)
-		})
+	router.Group(func(r chi.Router) {
+		r.Use(authenticationMiddleware.AuthMiddleware(cfg.Auth.JWTSecret))
+
+		// Protected routes
+		r.Get("/users/profile", userHandler.GetProfile)
+		r.Get("/users/wallets", walletHandler.GetWallet)
+		r.Post("/transfers", transactionHandler.CreateTransfer)
 	})
 
 	log.Printf("Starting server on port %s", cfg.Server.Port)

@@ -14,5 +14,6 @@ func NewQueries(db DBTX) *Queries {
 		WalletRepository: NewWalletRepository(db),
 		UserRepository:   NewUserRepository(db),
 		TransactionRepository: NewTransactionRepository(db),
+		OutboxRepository: NewOutboxRepository(db),
 	}
 }

@@ -1,10 +1,1 @@
-CREATE TABLE `outbox`(
-    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `topic` VARCHAR(255) NOT NULL,
-    `payload` JSON NOT NULL,
-    `status` ENUM(`UNPUBLISHED`, `PUBLISHED`) NOT NULL DEFAULT `UNPUBLISHED`,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-);
-
-CREATE INDEX `idx_outbox_status` ON `outbox`(`status`);
+DROP TABLE IF EXISTS `outbox`;

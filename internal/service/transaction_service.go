@@ -28,10 +28,16 @@ func (s *transactionService) CreateTransfer(ctx context.Context, senderUserID, r
 		if err != nil {
 			return err
 		}
+		if senderWallet == nil {
+			return ErrWalletNotFound
+		}
 
 		receiverWallet, err := s.store.GetByUserID(ctx, receiverUserID);
 		if err != nil {
 			return err
+		}
+		if receiverWallet == nil {
+			return ErrWalletNotFound
 		}
 
 		tx := &domain.Transaction{
